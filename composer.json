@@ -1,5 +1,5 @@
 {
-    "name": "critiq/laravel-dhead-manifest",
+    "name": "critiq/laravel-head-manifest",
     "description": "Define your HTML head attributes in a manifest shared between  Laravel and an SPA project so that robots crawling the page have access to up too path-specific metadata without requiring server side rendering on the SPA side",
     "type": "library",
     "license": "MIT",

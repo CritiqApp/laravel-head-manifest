@@ -9,6 +9,11 @@
             "email": "nicho@critiq.com"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "Critiq\\LaravelHeadManifest\\": "src"
+        }
+    },
     "minimum-stability": "dev",
     "require": {}
 }

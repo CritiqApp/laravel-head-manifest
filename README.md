@@ -165,4 +165,4 @@ Route::get('head-manifest', 'HeadManifestController@index');
 **Note:** Depending on your project structure, this may not work right away. I recommend reading up on how Laravel's routing system works (notably namespaces in the `RouteServiceProvider`). It's not essential to create your own `HeadManifestController`, you may instead route to the `LaravelHeadManifestController` class directly.
 
 ## Why this project?
-SPA apps don't always work well with our robot friends (Google crawlers, Facebook/Slack/Discord/etc unfurling, and many, many more). The goal of this project is to provide a way to elegantly define your head data for use in SPA contexts without sacrifing the benefits of page-specific metadata.
+SPA apps don't always work well with our robot friends (Google crawlers, Facebook/Slack/Discord/etc unfurling, and many, many more). The goal of this project is to provide a way to elegantly define your head data for use in SPA contexts without sacrificing the benefits of page-specific metadata.

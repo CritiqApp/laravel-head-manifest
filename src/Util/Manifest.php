@@ -58,13 +58,21 @@ class Manifest extends ManifestElement {
 
         // Find the first matching path
         /** @var ManifestPath */
+        $resolvedPath = $this->defaultPath;
         foreach($this->paths as $path) {
             if($path->matchesPath($requestPathSplits)) {
-                return $path;
+                $resolvedPath = $path;
+                break;
             }
         }
 
-        return $this->defaultPath;
+        // Initialize the resolver (if any)
+        $resolver = $resolvedPath->getResolver();
+        if(isset($resolver)) {
+            $resolver->initialize();
+        }
+
+        return $resolvedPath;
 
     }
 

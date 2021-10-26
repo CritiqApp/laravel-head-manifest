@@ -137,15 +137,17 @@ class ManifestPath extends ManifestElement {
     }
 
     /**
+     * Get the resolver
+     */
+    public function getResolver() {
+        return $this->resolver;
+    }
+
+    /**
      * Build the title of this path as well as the metadata
      */
     public function toHTML() {
         $values = [];
-
-        // Inititalize the resolver if there is any
-        if(isset($this->resolver)) {
-            $this->resolver->initialize();
-        }
 
         // Get this title, or use the default title
         $title = $this->resolveTitle();

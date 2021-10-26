@@ -126,6 +126,11 @@ class ManifestPath extends ManifestElement {
     public function toHTML() {
         $values = [];
 
+        // Inititalize the resolver if there is any
+        if(isset($this->resolver)) {
+            $this->resolver->initialize();
+        }
+
         // Get this title, or use the default title
         $title = isset($this->resolver) ? $this->resolver->buildTitle() : $this->getTitle();
 

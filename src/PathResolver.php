@@ -19,6 +19,13 @@ abstract class PathResolver {
     }
 
     /**
+     * Implement any kind of intitialisation
+     * logic in here, not the constructor! This
+     * is called in the right time
+     */
+    public function initialize() { }
+
+    /**
      * Build the meta
      * 
      * @return ManifestMeta[]

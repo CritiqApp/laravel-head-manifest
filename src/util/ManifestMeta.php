@@ -18,7 +18,7 @@ class ManifestMeta extends ManifestElement {
             $value = $this->replaceVars($value);
             $join .= "$key=\"$value\" ";
         }
-        return [$join . '/>'];
+        return $join . '/>';
     }
 
 }

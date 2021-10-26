@@ -6,7 +6,7 @@ use Critiq\LaravelHeadManifest\Util\Manifest;
 use Illuminate\Support\ServiceProvider;
 
 class LaravelHeadManifestServiceProvider extends ServiceProvider {
-
+    
     /**
      * Load the head manifest
      *

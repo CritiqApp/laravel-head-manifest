@@ -2,6 +2,8 @@
 
 namespace Critiq\LaravelHeadManifest\Util;
 
+use Critiq\LaravelHeadManifest\PathResolver;
+
 class ManifestPath extends ManifestElement {
 
     public $title;
@@ -13,12 +15,31 @@ class ManifestPath extends ManifestElement {
     private $vars = [];
     private $meta = [];
 
+    /** @var PathResolver */
+    private $resolver = null;
+
     public function __construct($path, $data, Manifest $manifest) {
         $this->title = array_key_exists('title', $data) ? $data['title'] : null;
         $this->path = $path;
         $this->pathSplits = preg_split('@/@', $this->path, 0, PREG_SPLIT_NO_EMPTY);
         $this->manifest = $manifest;
         $this->meta = array_key_exists('meta', $data) ? $data['meta'] : null; 
+
+        // See if a valid resolver is defined
+        if(array_key_exists('resolver', $data)) {
+            if(is_string($data['resolver'])) {
+                $alias = $data['resolver'];
+                $className = config("head.resolvers.$alias");
+                if(!isset($className)) {
+                    throw new InvalidHeadManifestException("Path resolver not found: $alias");
+                } else if(!is_subclass_of($className, PathResolver::class)) {
+                    throw new InvalidHeadManifestException("Resolver $className ($alias) must extend 'PathResolver'");
+                } else {
+                    $this->resolver = new $className($this->manifest, $this);
+                }
+            }
+        }
+
     }
 
     /**
@@ -59,9 +80,30 @@ class ManifestPath extends ManifestElement {
     }
 
     /**
+     * Get the set of variables
+     */
+    public function getVars() {
+        return $this->vars;
+    }
+
+    /**
+     * Returns the unmodified path title
+     */
+    public function getPathTitle() {
+        return $this->title;
+    }
+
+    /**
+     * Returns the unmodified and raw metadata
+     */
+    public function getPathMeta() {
+        return $this->meta;
+    }
+
+    /**
      * Builds the attributes we want to convert into HTML
      */
-    private function buildMetadata() {
+    public function buildMetadata() {
 
         // Merge all the metadata
         $allMeta = array_merge(
@@ -85,7 +127,7 @@ class ManifestPath extends ManifestElement {
         $values = [];
 
         // Get this title, or use the default title
-        $title = $this->getTitle();
+        $title = isset($this->resolver) ? $this->resolver->buildTitle() : $this->getTitle();
 
         // If a title is specified, build the HTML string
         if(isset($title)) {
@@ -95,7 +137,7 @@ class ManifestPath extends ManifestElement {
 
         $html = array_map(function($e) {
             return $e->toHTML();
-        }, $this->buildMetadata());
+        }, isset($this->resolver) ? $this->resolver->buildMetadata() : $this->buildMetadata());
 
         // Merge the html arrays
         $values = array_merge($values, $html);

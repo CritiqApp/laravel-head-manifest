@@ -11,9 +11,6 @@ class Manifest extends ManifestElement {
     /** @var ManifestPath[] registry of paths **/
     public $paths = [];
 
-    /** @var float start time of the manifest */
-    private $startTime;
-
     /** @var ManifestPath */
     public $defaultPath = null;
 
@@ -24,19 +21,23 @@ class Manifest extends ManifestElement {
 
         // Set some of the default attribute data
         $this->defaultTitle = array_key_exists('defaultTitle', $data) ? $data['defaultTitle'] : null;
-        $this->defaultMeta = is_array($data['defaultMeta']) ? $data['defaultMeta'] : [];
-        $this->globalMeta = is_array($data['globalMeta']) ? $data['globalMeta'] : [];
+        $this->defaultMeta = array_key_exists('defaultMeta', $data) && is_array('defaultMeta') ? $data['defaultMeta'] : [];
+        $this->globalMeta = array_key_exists('globalMeta', $data) && is_array('globalMeta') ? $data['globalMeta'] : [];
 
         // Make sure the 'paths' field is specified, and is an array
-        if(!is_array($data['paths'])) {
-            throw new InvalidHeadManifestException("Root 'paths' field must be specified as an array");
-        }
+        if(array_key_exists('paths', $data)){
+            
+            if(!is_array($data['paths'])) {
+                throw new InvalidHeadManifestException("Root 'paths' field must be specified as an array");
+            }
 
-        // Generate the paths
-        foreach($data['paths'] as $key => $data) {
-            $this->paths[] = new ManifestPath($key, $data, $this);
-        }
+            // Generate the paths
+            foreach($data['paths'] as $key => $data) {
+                $this->paths[] = new ManifestPath($key, $data, $this);
+            }
 
+        }
+        
         // Build the default path is no path is resolveable
         $this->defaultPath = new ManifestPath('', [
             'meta' => $this->defaultMeta,

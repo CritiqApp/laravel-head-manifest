@@ -30,17 +30,16 @@ class ManifestPath extends ManifestElement {
             $path = $i < count($requestPathSplits) ? $requestPathSplits[$i] : null;
             $match = $i < count($this->pathSplits) ? $this->pathSplits[$i] : null;
 
-            if(!isset($match) || !isset($path)) {
+            if(isset($match) && $match == '*') {
+                // If match is wildcard, this passes
+                return true;
+            } else if(!isset($match) || !isset($path)) {
                 // If match is null, this is a fail
                 return false;
             } else if($match[0] == ':') {
                 // If match has a prefix of `:`, skip this iteration as it's a variable
                 $this->vars[$match] = $path;
                 continue;
-            } else if($match == '*') {
-                // If match is a wildcard, this is a success since we don't care
-                // about subsequent path variables
-                return true;
             } else if($path != $match) {
                 // Check if the pattern matches. If not, this is a fail
                 return false;
@@ -86,7 +85,7 @@ class ManifestPath extends ManifestElement {
         $values = [];
 
         // Get this title, or use the default title
-        $title = isset($this->title) ? $this->title : $this->manifest->getDefaultTitle();
+        $title = $this->getTitle();
 
         // If a title is specified, build the HTML string
         if(isset($title)) {
@@ -104,5 +103,14 @@ class ManifestPath extends ManifestElement {
         return implode("\n", $values);
     }
 
+    /**
+     * Array representation of the path data
+     */
+    public function toArray() {
+        return [
+            'title' => $this->getTitle(),
+            'meta' => array_map(function($e) { $e->toArray(); }, $this->buildMetadata()),
+        ];
+    }
     
 }

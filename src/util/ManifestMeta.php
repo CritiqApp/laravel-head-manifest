@@ -21,4 +21,8 @@ class ManifestMeta extends ManifestElement {
         return $join . '/>';
     }
 
+    public function toArray() {
+        return $this->attributes;
+    }
+
 }

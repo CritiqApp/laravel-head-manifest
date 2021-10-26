@@ -2,31 +2,46 @@
 
 namespace Critiq\LaravelHeadManifest;
 
+use Critiq\LaravelHeadManifest\Util\Manifest;
 use Illuminate\Support\ServiceProvider;
 
-class LaravelHeadManifestServiceProvider extends ServiceProvider
-{
+class LaravelHeadManifestServiceProvider extends ServiceProvider {
 
     /**
      * Load the head manifest
      *
      * @return void
      */
-    public function boot()
-    {
-        // Specify the config key for the manifest once it's loaded
-        $configKey = env('LARAVEL_HEAD_MANIFEST_CONFIG_KEY', 'laravel_head_manifest');
-
-        // Load the manifest. If this fails, treat it as an empty manifest
-        try {
-            $manifest = file_get_contents(base_path() . env('LARAVEL_HEAD_MANIFEST_PATH', '/public/head-manifest.json'));
-            $json = json_decode($manifest, true);
-        } catch(\Exception $e) {
-            config($configKey, []);
-            return; // Do nothing, perhaps log a warning?
-        }
+    public function register() {
         
-        // Set the manifest as a config
-        config()->set($configKey, $json);
+        // Register the manifest as a singleton as it does not 
+        $this->app->singleton(Manifest::class, static function($app) {
+
+            // Load the manifest. If this fails, treat it as an empty manifest
+            $json = [];
+            try {
+                $manifest = file_get_contents(base_path() . env('LARAVEL_HEAD_MANIFEST_PATH', '/public/head-manifest.json'));
+                $json = json_decode($manifest, true);
+            } catch(\Exception $e) {
+                // Log a warning?
+            }
+
+            // Construct the manifest singleton
+            return new Manifest($json);
+        });
+        
     }
+
+    /**
+     * Register the view composer so it includes the manifest data
+     */
+    public function boot() {
+        view()->composer(env('LARAVEL_HEAD_MANIFEST_VIEWS', '*'), function($view) {
+            /** @var Manifest */
+            $manifest = app()->make(Manifest::class);
+            $path = $manifest->resolvePath(request()->path());
+            $view->with(env('LARAVEL_HEAD_MANIFEST_DATA_VARIABLE', 'metadata'), $path->toHTML());
+        });
+    }
+
 }

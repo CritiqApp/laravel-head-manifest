@@ -8,13 +8,17 @@ class ManifestPath extends ManifestElement {
     public $path;
     public $pathSplits;
 
+    /** @var Manifest */
+    private $manifest;
+    private $vars = [];
     private $meta = [];
 
     public function __construct($path, $data, Manifest $manifest) {
-        $this->title = array_key_exists('title', $data) ? $data['title'] : $manifest->defautTitle;
+        $this->title = array_key_exists('title', $data) ? $data['title'] : null;
         $this->path = $path;
         $this->pathSplits = preg_split('@/@', $this->path, 0, PREG_SPLIT_NO_EMPTY);
-        $this->meta = $data['meta']; 
+        $this->manifest = $manifest;
+        $this->meta = array_key_exists('meta', $data) ? $data['meta'] : null; 
     }
 
     /**
@@ -31,6 +35,7 @@ class ManifestPath extends ManifestElement {
                 return false;
             } else if($match[0] == ':') {
                 // If match has a prefix of `:`, skip this iteration as it's a variable
+                $this->vars[$match] = $path;
                 continue;
             } else if($match == '*') {
                 // If match is a wildcard, this is a success since we don't care
@@ -47,22 +52,31 @@ class ManifestPath extends ManifestElement {
     }
 
     /**
+     * Get the title for this path (or the default title
+     * if none is provided)
+     */
+    public function getTitle() {
+        return isset($this->title) ? $this->replaceVars($this->title) : $this->manifest->getDefaultTitle();
+    }
+
+    /**
      * Builds the attributes we want to convert into HTML
      */
-    private function buildMetadataHTML() {
+    private function buildMetadata() {
 
-        // Make sure the meta is an array
-        if(!is_array($this->meta)) {
-            throw new InvalidHeadManifestException('"meta" field must be an array of meta objects');
-        }
+        // Merge all the metadata
+        $allMeta = array_merge(
+            isset($this->meta) ? $this->meta : $this->manifest->getDefaultMeta(),
+            $this->manifest->getGlobalMeta()
+        );
 
         // Map the manifest meta objects to html
-        $html = [];
-        foreach($this->meta as $data) {
-            $html = array_merge($html, (new ManifestMeta($data))->toHTML());
+        $metadata = [];
+        foreach($allMeta as $data) {
+            $metadata[] = new ManifestMeta($data, $this->vars);
         }
         
-        return $html;
+        return $metadata;
     }
 
     /**
@@ -70,8 +84,24 @@ class ManifestPath extends ManifestElement {
      */
     public function toHTML() {
         $values = [];
-        $values = array_merge($values, $this->buildMetadataHTML());
-        return $values;
+
+        // Get this title, or use the default title
+        $title = isset($this->title) ? $this->title : $this->manifest->getDefaultTitle();
+
+        // If a title is specified, build the HTML string
+        if(isset($title)) {
+            $varTitle = $this->replaceVars($title);
+            $values[] = "<title>$varTitle</title>";
+        }
+
+        $html = array_map(function($e) {
+            return $e->toHTML();
+        }, $this->buildMetadata());
+
+        // Merge the html arrays
+        $values = array_merge($values, $html);
+
+        return implode("\n", $values);
     }
 
     

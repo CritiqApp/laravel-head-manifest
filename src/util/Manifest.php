@@ -4,18 +4,23 @@ namespace Critiq\LaravelHeadManifest\Util;
 
 class Manifest extends ManifestElement {
 
-    public $defaultTitle;
-    public $defaultMeta;
-    public $globalMeta;
+    private $defaultTitle;
+    private $defaultMeta;
+    private $globalMeta;
+
+    /** @var ManifestPath[] registry of paths **/
     public $paths = [];
 
     /** @var float start time of the manifest */
     private $startTime;
 
     /** @var ManifestPath */
-    public $path = null;
+    public $defaultPath = null;
 
-    public function __construct($data, $reqestPathSplits) {
+    public function __construct($data) {
+
+        // For debugging purposes
+        $this->startTime = microtime(true);
 
         // Set some of the default attribute data
         $this->defaultTitle = array_key_exists('defaultTitle', $data) ? $data['defaultTitle'] : null;
@@ -32,53 +37,55 @@ class Manifest extends ManifestElement {
             $this->paths[] = new ManifestPath($key, $data, $this);
         }
 
+        // Build the default path is no path is resolveable
+        $this->defaultPath = new ManifestPath('', [
+            'meta' => $this->defaultMeta,
+        ], $this);
+        
+    }
+
+    /**
+     * Find the matched manifest path. If the path
+     * can't be resolved, return the default path
+     * information
+     * 
+     * @return ManifestPath
+     */
+    public function resolvePath($path) {
+
+        $requestPathSplits = preg_split('@/@', $path, 0, PREG_SPLIT_NO_EMPTY);
+
         // Find the first matching path
         /** @var ManifestPath */
         foreach($this->paths as $path) {
-            if($path->matchesPath($reqestPathSplits)) {
-                $this->path = $path;
-                break;
+            if($path->matchesPath($requestPathSplits)) {
+                return $path;
             }
         }
 
-        $this->startTime = microtime(true);
-        
+        return $this->defaultPath;
+
     }
 
-    public function toHTML() {
-        
-        $values = [];
-
-        // Set the specified title
-        if(isset($this->path->title)) {
-            $title = $this->path->title;
-            $values[] = "<title>$title</title>";
-        } else if(isset($this->defaultTitle)) {
-            $values[] = "<title>$this->defaultTitle</title>";
-        }
-
-        if(isset($this->path)) {
-            $values = array_merge($values, $this->path->toHTML());
-        } else {
-            $values = array_merge($values, array_map(function($e) {
-                return (new ManifestMeta($e))->toHTML();
-            }, $this->defaultMeta));
-        }
-
-        $values = array_merge($values, array_map(function($e) {
-            return (new ManifestMeta($e))->toHTML();
-        }, $this->globalMeta));
-
-        if(env('APP_DEBUG')) {
-            $duration = microtime(true) - $this->startTime;
-            $values[] = '<meta name="laravel-head-manifest timer" content="' . $duration . '" />';
-        }
-
-        return $values;
+    /**
+     * Get the default title
+     */
+    public function getDefaultTitle() {
+        return $this->defaultTitle;
     }
 
-    public function toHTMLString() {
-        return implode($this->toHTML(), "\n");
+    /**
+     * Get the default meta
+     */
+    public function getDefaultMeta() {
+        return $this->defaultMeta;
+    }
+
+    /**
+     * Get the array of global metadata
+     */
+    public function getGlobalMeta() {
+        return $this->globalMeta;
     }
 
 }

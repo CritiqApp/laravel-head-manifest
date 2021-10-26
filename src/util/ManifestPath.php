@@ -121,6 +121,22 @@ class ManifestPath extends ManifestElement {
     }
 
     /**
+     * Gets the finalized title 
+     * (considering all configurations and resolvers)
+     */
+    private function resolveTitle() {
+        return isset($this->resolver) ? $this->resolver->buildTitle() : $this->getTitle();
+    }
+
+    /**
+     * Gets the finalized metadata array
+     * (considering all configurations and resolvers)
+     */
+    private function resolveMetadata() {
+        return isset($this->resolver) ? $this->resolver->buildMetadata() : $this->buildMetadata();
+    }
+
+    /**
      * Build the title of this path as well as the metadata
      */
     public function toHTML() {
@@ -132,7 +148,7 @@ class ManifestPath extends ManifestElement {
         }
 
         // Get this title, or use the default title
-        $title = isset($this->resolver) ? $this->resolver->buildTitle() : $this->getTitle();
+        $title = $this->resolveTitle();
 
         // If a title is specified, build the HTML string
         if(isset($title)) {
@@ -142,7 +158,7 @@ class ManifestPath extends ManifestElement {
 
         $html = array_map(function($e) {
             return $e->toHTML();
-        }, isset($this->resolver) ? $this->resolver->buildMetadata() : $this->buildMetadata());
+        }, $this->resolveMetadata());
 
         // Merge the html arrays
         $values = array_merge($values, $html);
@@ -155,8 +171,8 @@ class ManifestPath extends ManifestElement {
      */
     public function toArray() {
         return [
-            'title' => $this->getTitle(),
-            'meta' => array_map(function($e) { $e->toArray(); }, $this->buildMetadata()),
+            'title' => $this->resolveTitle(),
+            'meta' => array_map(function($e) { return $e->toArray(); }, $this->resolveMetadata()),
         ];
     }
     

@@ -21,8 +21,8 @@ class Manifest extends ManifestElement {
 
         // Set some of the default attribute data
         $this->defaultTitle = array_key_exists('defaultTitle', $data) ? $data['defaultTitle'] : null;
-        $this->defaultMeta = array_key_exists('defaultMeta', $data) && is_array('defaultMeta') ? $data['defaultMeta'] : [];
-        $this->globalMeta = array_key_exists('globalMeta', $data) && is_array('globalMeta') ? $data['globalMeta'] : [];
+        $this->defaultMeta = array_key_exists('defaultMeta', $data) && is_array($data['defaultMeta']) ? $data['defaultMeta'] : [];
+        $this->globalMeta = array_key_exists('globalMeta', $data) && is_array($data['globalMeta']) ? $data['globalMeta'] : [];
 
         // Make sure the 'paths' field is specified, and is an array
         if(array_key_exists('paths', $data)){

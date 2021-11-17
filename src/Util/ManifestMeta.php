@@ -13,7 +13,7 @@ class ManifestMeta extends ManifestElement {
     }
 
     public function toHTML() {
-        $join = '<meta ';
+        $join = '<meta lhm_meta ';
         foreach($this->attributes as $key => $value) {
             $value = $this->replaceVars($value);
             $join .= "$key=\"$value\" ";

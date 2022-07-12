@@ -53,7 +53,7 @@ class ManifestPath extends ManifestElement {
 
             if(isset($match) && $match == '*') {
                 // If match is wildcard, this passes
-                $this->vars['*'] = implode('/', array_slice($requestPathSplits, $i));
+                $this->vars[':*'] = implode('/', array_slice($requestPathSplits, $i));
                 return true;
             } else if(!isset($match) || !isset($path)) {
                 // If match is null, this is a fail

@@ -12,7 +12,7 @@ class ManifestPath extends ManifestElement {
 
     /** @var Manifest */
     private $manifest;
-    private $vars = [];
+    protected $vars = [];
     private $meta = [];
 
     /** @var PathResolver */

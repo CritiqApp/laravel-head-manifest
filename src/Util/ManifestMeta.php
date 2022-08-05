@@ -5,7 +5,7 @@ namespace Critiq\LaravelHeadManifest\Util;
 class ManifestMeta extends ManifestElement {
 
     private $attributes;
-    private $vars;
+    protected $vars;
 
     public function __construct($data, $vars = []) {
         $this->attributes = $data;

@@ -4,6 +4,8 @@ namespace Critiq\LaravelHeadManifest\Util;
 
 abstract class ManifestElement {
 
+    protected $vars;
+
     /**
      * Replace variables in a string by its definition
      */

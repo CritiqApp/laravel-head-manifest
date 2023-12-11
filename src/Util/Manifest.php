@@ -7,6 +7,7 @@ class Manifest extends ManifestElement {
     private $defaultTitle;
     private $defaultMeta;
     private $globalMeta;
+    private $startTime;
 
     /** @var ManifestPath[] registry of paths **/
     public $paths = [];
